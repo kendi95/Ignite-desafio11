@@ -16,14 +16,18 @@ export class UsersRepository implements IUsersRepository {
   }: IFindUserWithGamesDTO): Promise<User> {
     // Complete usando ORM
     const user = await 
-      this.repository.findOneOrFail({ where: { id: user_id } });
+      this.repository.findOneOrFail({ 
+        where: { id: user_id },
+        relations: ["games"]
+      });
+
     return user;
   }
 
   async findAllUsersOrderedByFirstName(): Promise<User[]> {
     return this
       .repository
-      .query("SELDCT * FROM users ORDER BY name ASC"); // Complete usando raw query
+      .query("SELECT * FROM users ORDER BY first_name ASC"); // Complete usando raw query
   }
 
   async findUserByFullName({
@@ -33,8 +37,8 @@ export class UsersRepository implements IUsersRepository {
     return this
       .repository
       .query(
-        "SELECT * FROM users WHERE first_name like lower(?) AND last_name like lower(?)",
-        [`%${first_name}%`, `%${last_name}%`]
+        "SELECT * FROM users WHERE lower(first_name) = lower($1) AND lower(last_name) = lower($2)",
+        [first_name, last_name]
       ); // Complete usando raw query
   }
 }
